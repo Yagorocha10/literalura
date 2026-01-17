@@ -1,12 +1,32 @@
 package com.example.literalura.principal;
 
+import com.example.literalura.model.DadosLivro;
+import com.example.literalura.model.DadosResposta;
+import com.example.literalura.model.Livro;
+import com.example.literalura.repository.LivroRepository;
+import com.example.literalura.service.ConsumoApi;
+import com.example.literalura.service.ConverteDados;
+
 import java.util.Scanner;
 
 public class Principal {
 
-    public void exibeMenu() {
+    private Scanner sc = new Scanner(System.in);
+    private ConsumoApi consumo = new ConsumoApi();
+    private ConverteDados converteDados = new ConverteDados();
+    private final String ENDERECO = "https://gutendex.com/books/?search=";
 
-        Scanner sc = new Scanner(System.in);
+
+    private LivroRepository repositorio;
+
+    public Principal(LivroRepository repositorio) {
+        this.repositorio = repositorio;
+    }
+
+
+
+
+    public void exibeMenu() {
 
         var opcao = 9;
         while (opcao != 6) {
@@ -52,7 +72,28 @@ public class Principal {
     }
 
 
-    private void buscarLivroPeloTitulo() {
+    private DadosLivro buscarLivroPeloTitulo() {
+        System.out.println("Insira o nome do livro que voce deseja procurar: ");
+        var nomeLivro = sc.nextLine();
+        var json = consumo.obterDados(ENDERECO + nomeLivro.replace(" ", "%20"));
+        DadosResposta dadosResposta = converteDados.obterDados(json, DadosResposta.class);
+
+        if (dadosResposta != null && !dadosResposta.resultados().isEmpty()) {
+            DadosLivro dadosLivro = dadosResposta.resultados().get(0);
+
+            Livro livro = new Livro(dadosLivro);
+
+            repositorio.save(livro);
+
+            System.out.println("Livro salvo com sucesso no banco!");
+            System.out.println(livro);
+            return dadosLivro;
+
+
+        } else {
+            System.out.println("Livro não encontrado");
+            return null;
+        }
     }
 
     private void listarLivrosRegistrados() {

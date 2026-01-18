@@ -6,6 +6,7 @@ import com.example.literalura.repository.LivroRepository;
 import com.example.literalura.service.ConsumoApi;
 import com.example.literalura.service.ConverteDados;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Principal {
@@ -30,7 +31,7 @@ public class Principal {
     public void exibeMenu() {
 
         var opcao = 9;
-        while (opcao != 6) {
+        while (opcao != 7) {
             System.out.println("""
                     Escolha o número de sua opção:
                     1- buscar livro pelo titulo
@@ -39,7 +40,7 @@ public class Principal {
                     4- listar autores registrados
                     5- listar autores vivos em um determinado ano
                     6- listar livros em um determinado idioma
-                    6- sair
+                    7- Sair
                                     
                     """);
         opcao = sc.nextInt();
@@ -62,7 +63,11 @@ public class Principal {
                 listarAutoresVivosEmDeterminadoAno();
                 break;
             case 6:
-                listarLivrosEmDeterminadoAno();
+                listarLivrosEmDeterminadoIdioma();
+                break;
+            case 7:
+                System.out.println("Saindo...");
+                break;
             default:
                 System.out.println("Opção inválida");
         }
@@ -143,8 +148,44 @@ public class Principal {
     }
 
     private void listarAutoresVivosEmDeterminadoAno() {
+        System.out.println("Digite o ano que deseja pesquisar: ");
+        var ano = sc.nextInt();
+        sc.nextLine();
+
+        List<Autor> autores = autorRepositorio.buscarAutoresVivosEmDeterminadoAno(ano);
+
+        if (autores.isEmpty()) {
+            System.out.println("Nenhum autor encotrado vivo no ano de : " + ano);
+        } else {
+            System.out.println("\nAutores vivos no ano de " + ano + ":");
+            autores.forEach(System.out::println);
+        }
+
     }
 
-    private void listarLivrosEmDeterminadoAno() {
+    private void listarLivrosEmDeterminadoIdioma() {
+        System.out.println("""
+                Insira o idioma para busca: 
+                es - espanhol
+                en = inglês
+                fr - francês
+                pt - português
+                
+                
+                """);
+
+        var idiomaEscolhido = sc.nextLine().toLowerCase();
+
+        List<Livro> livrosPorIdioma = livroRepositorio.findByIdioma(idiomaEscolhido);
+
+        if (livrosPorIdioma.isEmpty()) {
+            System.out.println("Nenhum livro cadastado no idioma: " + idiomaEscolhido);
+        } else {
+            System.out.println("\n--- LIVROS NO IDIOMA " + idiomaEscolhido.toLowerCase() + " -----");
+            livrosPorIdioma.forEach(System.out::println);
+        }
+
+
     }
+
 }
